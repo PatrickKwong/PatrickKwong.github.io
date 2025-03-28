@@ -26,14 +26,32 @@
 		h6 {
         color: #87CEEB;
 		}
-        .bird {
-            position: absolute;
-            width: 100px;
-            height: auto;
-            transition: transform 2s linear;
-        }
-    </style>
-
+		/* Container for each bird (positioned absolutely and moved by JS) */
+		.bird-container {
+		  position: absolute;
+		  transition: transform 2s linear;
+		}
+		/* Anchor tag resets */
+		.bird-container a {
+		  text-decoration: none;
+		  display: block;
+		}
+		/* Bird image with rocking animation */
+		.bird-image {
+		  width: 80px;
+		  height: auto;
+		  /* Rocking keyframe animation */
+		  animation: rock 2s infinite linear;
+		  transform-origin: center;
+		}
+		/* Keyframes for rocking effect */
+		@keyframes rock {
+		  0% { transform: rotate(-10deg); }
+		  50% { transform: rotate(10deg); }
+		  100% { transform: rotate(-10deg); }
+		}
+	</style>
+	
 	<script>
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -45,8 +63,7 @@
 </head>
 
 <body>
-    <a href="https://en.wikipedia.org/wiki/Hummingbird"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Hummingbird_Bird_Vintage_Art.png/640px-Hummingbird_Bird_Vintage_Art.png" class="bird" id="bird"></a>
-	
+
     <br />	  
     <h1>Welcome!</h1>
     <h6>How did you end up here? Hopefully you don't see this...</h6>
@@ -54,24 +71,67 @@
     <a href="http://www.lakers.com" style="color:#FDB927; text-decoration:none;">Go Lakers!</a><br>
     <a href="https://www.nhl.com/kings/" style="color:#000000; text-decoration:none;">Go Kings!</a><br><br>
 	
-<script>
-    function getRandomPosition() {
-        const maxX = window.innerWidth - 100; 
-        const maxY = window.innerHeight - 100;
-        return {
-            x: Math.random() * maxX,
-            y: Math.random() * maxY
-        };
-    }
+	<script>
+	  const numBirds = 5;
+	  const birds = [];
 
-    function moveBird() {
-        const bird = document.getElementById("bird");
-        const { x, y } = getRandomPosition();
-        bird.style.transform = `translate(${x}px, ${y}px)`;
-    }
+	  // Create bird containers with a clickable link and an image
+	  function createBirds() {
+		for (let i = 0; i < numBirds; i++) {
+		  const container = document.createElement("div");
+		  container.className = "bird-container";
+		  container.id = "bird-container-" + i;
 
-    setInterval(moveBird, 2000);
-</script>
+		  const link = document.createElement("a");
+		  // Link to the Hummingbird Wikipedia page; opens in a new tab.
+		  link.href = "https://en.wikipedia.org/wiki/Hummingbird";
+		  link.target = "_blank";
+
+		  const img = document.createElement("img");
+		  img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Hummingbird_Bird_Vintage_Art.png/640px-Hummingbird_Bird_Vintage_Art.png";
+		  img.alt = "Bird";
+		  img.className = "bird-image";
+
+		  link.appendChild(img);
+		  container.appendChild(link);
+		  document.body.appendChild(container);
+
+		  // Set initial random position
+		  const pos = getRandomPosition();
+		  container.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+		  birds.push(container);
+		}
+	  }
+
+	  // Return a random position within the viewport for the bird container.
+	  function getRandomPosition() {
+		const containerWidth = 80; // same as bird width
+		const containerHeight = 80; // approximate height
+		const maxX = window.innerWidth - containerWidth;
+		const maxY = window.innerHeight - containerHeight;
+		return {
+		  x: Math.random() * maxX,
+		  y: Math.random() * maxY
+		};
+	  }
+
+	  // Update the positions of all bird containers
+	  function moveBirds() {
+		birds.forEach(bird => {
+		  const pos = getRandomPosition();
+		  bird.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+		});
+	  }
+
+	  // Initialize birds and then move them every 2 seconds.
+	  createBirds();
+	  setInterval(moveBirds, 2000);
+
+	  // Update positions if the window is resized.
+	  window.addEventListener("resize", () => {
+		moveBirds();
+	  });
+	</script>
 
 </body>
 </html>
