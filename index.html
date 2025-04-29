@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Patrick Kwong's Dice Roller</title>
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<meta name="description" content="Patrick Kwong's Dice Roller">
+	<meta name="keywords" content="patrick kwong dice roller">
+	<meta name="author" content="Patrick Kwong">
+  
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Roboto';
+      text-align: center;
+      padding: 20px;
+    }
+
+    #controls {
+	  margin-top: 50px;
+      margin-bottom: 20px;
+    }
+
+    .dice-container {
+	  margin-top:40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      perspective: 1000px;
+    }
+
+    .cube {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease-out;
+    }
+
+    .face {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: inset -2px -2px 5px #ccc, inset 2px 2px 5px #888;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 10px;
+    }
+
+    .pip {
+      width: 14px;
+      height: 14px;
+      background: black;
+      border-radius: 50%;
+      align-self: center;
+      justify-self: center;
+    }
+
+    /* Position each face */
+    .front  { transform: rotateY(  0deg) translateZ(40px); }
+    .back   { transform: rotateY(180deg) translateZ(40px); }
+    .right  { transform: rotateY( 90deg) translateZ(40px); }
+    .left   { transform: rotateY(-90deg) translateZ(40px); }
+    .top    { transform: rotateX( 90deg) translateZ(40px); }
+    .bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+    button {
+      padding: 15px 25px;
+      font-size: 1rem;
+      background: #51BC56;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #478A4A;
+    }
+  </style>
+  
+  	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-51898731-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+  
+</head>
+<body>
+  <h1>🎲 Dice Roller 🎲</h1>
+  
+  <div class="dice-container" id="dice-container"></div>
+  <audio id="dice-sound" src="dice.mp3" preload="auto"></audio>
+  
+  <div id="controls">
+    <label># of Dice:
+      <select id="dice-count">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+      </select>
+    </label>
+    <label>
+      <input type="checkbox" id="sound-toggle" checked>
+      Sound
+    </label>
+  </div>
+  
+	<button onclick="rollDice()">Roll</button>
+
+  <script>
+    const pipPatterns = {
+      1: [4],
+      2: [0, 8],
+      3: [0, 4, 8],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8],
+    };
+
+    const faceTransforms = {
+      1: [0, 0],
+      2: [0, 180],
+      3: [0, -90],
+      4: [0, 90],
+      5: [90, 0],
+      6: [-90, 0]
+    };
+
+	function createFace(value) {
+	  const face = document.createElement("div");
+	  face.className = "face";
+	  const pattern = pipPatterns[value];
+	  for (let i = 0; i < 9; i++) {
+		const pip = document.createElement("div");
+		if (pattern.includes(i)) {
+		  pip.className = "pip";
+		  if (value === 1 && i === 4) {
+			pip.style.background = "red"; // Make the center pip red on "1"
+		  }
+		}
+		face.appendChild(pip);
+	  }
+	  return face;
+	}
+
+    function createCube(value) {
+      const cube = document.createElement("div");
+      cube.className = "cube";
+
+      const faces = {
+        front: 1, back: 2, left: 3,
+        right: 4, top: 5, bottom: 6
+      };
+
+      for (let [side, val] of Object.entries(faces)) {
+        const face = createFace(val);
+        face.classList.add(side);
+        cube.appendChild(face);
+      }
+
+      // Add random rolling animation before final orientation
+      const [xFinal, yFinal] = faceTransforms[value];
+      const xRolls = 6 + Math.floor(Math.random() * 3); // 3–4 rolls
+      const yRolls = 6 + Math.floor(Math.random() * 3);
+      const xRot = 360 * xRolls + xFinal;
+      const yRot = 360 * yRolls + yFinal;
+
+      // Delay to allow layout before animating
+      setTimeout(() => {
+        cube.style.transform = `rotateX(${xRot}deg) rotateY(${yRot}deg)`;
+      }, 1);
+
+      return cube;
+    }
+
+    function rollDice() {
+      const container = document.getElementById("dice-container");
+      container.innerHTML = "";
+      const count = parseInt(document.getElementById("dice-count").value);
+      const soundEnabled = document.getElementById("sound-toggle").checked;
+      if (soundEnabled) {
+        const sound = document.getElementById("dice-sound");
+        sound.currentTime = 0;
+        sound.play();
+      }
+
+      for (let i = 0; i < count; i++) {
+        const value = Math.floor(Math.random() * 6) + 1;
+        const cube = createCube(value);
+        container.appendChild(cube);
+      }
+    }
+  </script>
+</body>
+</html>
