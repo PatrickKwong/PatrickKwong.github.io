@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Dice Roller!</title>
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<meta name="description" content="Rolling Dice">
+	<meta name="keywords" content="patrick kwong Dice Roller">
+	<meta name="author" content="Patrick Kwong">
+	
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    select, label {
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    button {
+      padding: 10px 25px;
+      font-size: 18px;
+      background-color: #51BC56;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #478A4A;
+    }
+
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 30px;
+      gap: 15px;
+    }
+
+    .dice {
+      font-size: 80px;
+      animation: shake 0.6s;
+    }
+
+    .rolling {
+      animation: shake 0.6s;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      20% { transform: translate(-3px, 2px) rotate(-5deg); }
+      40% { transform: translate(3px, -2px) rotate(5deg); }
+      60% { transform: translate(-2px, 1px) rotate(0deg); }
+      80% { transform: translate(2px, -1px) rotate(-2deg); }
+      100% { transform: translate(1px, 2px) rotate(0deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎲 Dice Roller! 🎲</h1>
+
+  <div class="controls">
+    <label for="numDice"># of Dice:</label>
+    <select id="numDice">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+	  <option value="7">7</option>
+      <option value="8">8</option>
+	  <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+
+    <label>
+      <input type="checkbox" id="soundToggle" checked>
+      Sound
+    </label>
+  </div>
+
+  <button onclick="rollDice()">Roll</button>
+
+  <div class="dice-container" id="diceContainer"></div>
+
+  <audio id="diceSound" src="dice.mp3" preload="auto"></audio>
+
+  <script>
+    const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+    function rollDice() {
+      const numDice = parseInt(document.getElementById("numDice").value);
+      const diceContainer = document.getElementById("diceContainer");
+      const playSound = document.getElementById("soundToggle").checked;
+      const sound = document.getElementById("diceSound");
+
+      diceContainer.innerHTML = "";
+
+      // Create placeholder dice with animation
+      for (let i = 0; i < numDice; i++) {
+        const die = document.createElement("div");
+        die.className = "dice rolling";
+        die.textContent = diceFaces[Math.floor(Math.random() * 6)];
+        diceContainer.appendChild(die);
+      }
+
+      if (playSound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+
+      // After animation, show final result
+      setTimeout(() => {
+        const dice = diceContainer.children;
+        for (let i = 0; i < dice.length; i++) {
+          dice[i].classList.remove("rolling");
+          dice[i].textContent = diceFaces[Math.floor(Math.random() * 6)];
+        }
+      }, 600);
+    }
+  </script>
+
+</body>
+</html>
